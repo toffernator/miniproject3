@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package = "github.com/toffernator/miniproject3/api"
+
+message Bid {
+    int32 amount = 1;
+}
+
+message Ack {
+    enum Status {
+        FAILED = 1;
+        SUCCESS = 2;
+        EXCEPTION = 3;
+    }
+    Status Status = 1;
+}
+
+message Result {
+}
+
+message Outcome {
+    int32 ResultOrHighest = 1;
+}
+
+message Election {
+}
+
+message Answer {
+}
+
+message Coordinator {
+    int32 id = 1;
+}
+
