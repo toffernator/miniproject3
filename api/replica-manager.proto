@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/toffernator/miniproject3/api"
+option go_package = "github.com/toffernator/miniproject3/api";
 
 message Bid {
     int32 amount = 1;
@@ -8,11 +8,11 @@ message Bid {
 
 message Ack {
     enum Status {
-        FAILED = 1;
-        SUCCESS = 2;
-        EXCEPTION = 3;
+        FAILED = 0;
+        SUCCESS = 1;
+        EXCEPTION = 2;
     }
-    Status Status = 1;
+    Status status = 1;
 }
 
 message Result {
