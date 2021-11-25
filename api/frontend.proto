@@ -4,6 +4,7 @@ option go_package = "github.com/toffernator/miniproject3/api";
 
 message Bid {
     int32 amount = 1;
+    string user = 2;
 }
 
 message Ack {
@@ -15,10 +16,15 @@ message Ack {
     Status status = 1;
 }
 
-message Result {
+message Empty {
 }
 
 message Outcome {
     int32 ResultOrHighest = 1;
+    string Winner
 }
 
+service Auction {
+    rpc Bid(Bid) returns (Ack);
+    rpc Result(Empty) returns (Outcome)
+}

@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+option go_package = "github.com/toffernator/miniproject3/api";
+
+message Bid {
+    int32 amount = 1;
+    string user = 2;
+}
+
+message Ack {
+    enum Status {
+        FAILED = 0;
+        SUCCESS = 1;
+        EXCEPTION = 2;
+    }
+    Status status = 1;
+}
+
+message Empty {
+}
+
+message Outcome {
+    int32 ResultOrHighest = 1;
+    string Winner
+}
+
+service Auction {
+    rpc Bid(Bid) returns (Ack);
+    rpc Result(Empty) returns (Outcome);
+}
+
+service ReplicationControl {
+    rpc ForceBid(Bid) returns (Ack);
+}
