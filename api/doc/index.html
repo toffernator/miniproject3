@@ -183,15 +183,15 @@
                 </li>
               
                 <li>
-                  <a href="#.Bid"><span class="badge">M</span>Bid</a>
+                  <a href="#.BidMsg"><span class="badge">M</span>BidMsg</a>
+                </li>
+              
+                <li>
+                  <a href="#.Empty"><span class="badge">M</span>Empty</a>
                 </li>
               
                 <li>
                   <a href="#.Outcome"><span class="badge">M</span>Outcome</a>
-                </li>
-              
-                <li>
-                  <a href="#.Result"><span class="badge">M</span>Result</a>
                 </li>
               
               
@@ -201,28 +201,13 @@
               
               
               
-            </ul>
-          </li>
-        
-          
-          <li>
-            <a href="#election.proto">election.proto</a>
-            <ul>
-              
                 <li>
-                  <a href="#.Answer"><span class="badge">M</span>Answer</a>
+                  <a href="#.Auction"><span class="badge">S</span>Auction</a>
                 </li>
               
                 <li>
-                  <a href="#.Coordinator"><span class="badge">M</span>Coordinator</a>
+                  <a href="#.ReplicationControl"><span class="badge">S</span>ReplicationControl</a>
                 </li>
-              
-                <li>
-                  <a href="#.Election"><span class="badge">M</span>Election</a>
-                </li>
-              
-              
-              
               
             </ul>
           </li>
@@ -263,7 +248,7 @@
 
         
       
-        <h3 id=".Bid">Bid</h3>
+        <h3 id=".BidMsg">BidMsg</h3>
         <p></p>
 
         
@@ -280,10 +265,24 @@
                   <td><p> </p></td>
                 </tr>
               
+                <tr>
+                  <td>user</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
           
+
+        
+      
+        <h3 id=".Empty">Empty</h3>
+        <p></p>
+
+        
 
         
       
@@ -304,17 +303,17 @@
                   <td><p> </p></td>
                 </tr>
               
+                <tr>
+                  <td>Winner</td>
+                  <td><a href="#string">string</a></td>
+                  <td></td>
+                  <td><p> </p></td>
+                </tr>
+              
             </tbody>
           </table>
 
           
-
-        
-      
-        <h3 id=".Result">Result</h3>
-        <p></p>
-
-        
 
         
       
@@ -353,58 +352,51 @@
       
 
       
-    
-      
-      <div class="file-heading">
-        <h2 id="election.proto">election.proto</h2><a href="#title">Top</a>
-      </div>
-      <p></p>
-
-      
-        <h3 id=".Answer">Answer</h3>
+        <h3 id=".Auction">Auction</h3>
         <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>Bid</td>
+                <td><a href="#BidMsg">.BidMsg</a></td>
+                <td><a href="#Ack">.Ack</a></td>
+                <td><p></p></td>
+              </tr>
+            
+              <tr>
+                <td>Result</td>
+                <td><a href="#Empty">.Empty</a></td>
+                <td><a href="#Outcome">.Outcome</a></td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
 
         
-
-        
-      
-        <h3 id=".Coordinator">Coordinator</h3>
+        <h3 id=".ReplicationControl">ReplicationControl</h3>
         <p></p>
+        <table class="enum-table">
+          <thead>
+            <tr><td>Method Name</td><td>Request Type</td><td>Response Type</td><td>Description</td></tr>
+          </thead>
+          <tbody>
+            
+              <tr>
+                <td>ForceBid</td>
+                <td><a href="#BidMsg">.BidMsg</a></td>
+                <td><a href="#Ack">.Ack</a></td>
+                <td><p></p></td>
+              </tr>
+            
+          </tbody>
+        </table>
 
         
-          <table class="field-table">
-            <thead>
-              <tr><td>Field</td><td>Type</td><td>Label</td><td>Description</td></tr>
-            </thead>
-            <tbody>
-              
-                <tr>
-                  <td>id</td>
-                  <td><a href="#int32">int32</a></td>
-                  <td></td>
-                  <td><p> </p></td>
-                </tr>
-              
-            </tbody>
-          </table>
-
-          
-
-        
-      
-        <h3 id=".Election">Election</h3>
-        <p></p>
-
-        
-
-        
-      
-
-      
-
-      
-
-      
     
 
     <h2 id="scalar-value-types">Scalar Value Types</h2>

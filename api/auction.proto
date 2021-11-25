@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "github.com/toffernator/miniproject3/api";
 
-message Bid {
+message BidMsg {
     int32 amount = 1;
     string user = 2;
 }
@@ -21,10 +21,14 @@ message Empty {
 
 message Outcome {
     int32 ResultOrHighest = 1;
-    string Winner
+    string Winner = 2;
 }
 
 service Auction {
-    rpc Bid(Bid) returns (Ack);
-    rpc Result(Empty) returns (Outcome)
+    rpc Bid(BidMsg) returns (Ack);
+    rpc Result(Empty) returns (Outcome);
+}
+
+service ReplicationControl {
+    rpc ForceBid(BidMsg) returns (Ack);
 }
