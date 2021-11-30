@@ -19,7 +19,7 @@ var (
 )
 
 func main() {
-	conn, err := grpc.Dial(*addressFlag, grpc.WithInsecure, grpc.WithBlock)
+	conn, err := grpc.Dial(*addressFlag, grpc.WithInsecure(), grpc.WithBlock())
 	must(err)
 	client := api.NewAuctionClient(conn)
 
