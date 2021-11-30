@@ -92,7 +92,8 @@ func newClient(server string) *CombinedClient {
 }
 
 func main() {
-	for _, replica := range os.Args {
+	replicas := os.Args[1:]
+	for _, replica := range replicas {
 		clients = append(clients, newClient(replica))
 	}
 

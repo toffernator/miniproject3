@@ -8,5 +8,4 @@ RUN go mod download
 COPY . /src/
 
 RUN go build -o "bin/out" github.com/toffernator/miniproject3/client
-EXPOSE 50000
 ENTRYPOINT ["bin/out"]
