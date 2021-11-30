@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"math/rand"
+	"net"
 	"os"
 	"time"
 
@@ -18,7 +19,7 @@ type AuctionServer struct {
 	api.UnimplementedAuctionServer
 }
 
-func (s *AuctionServer) Bid(msg *api.BidMsg) *api.Ack {
+func (s AuctionServer) Bid(ctx context.Context, msg *api.BidMsg) (*api.Ack, error) {
 	failed_clients := make([]*CombinedClient, 0)
 	for _, client := range clients {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -46,14 +47,14 @@ func (s *AuctionServer) Bid(msg *api.BidMsg) *api.Ack {
 				log.Println("Unknown exception occured in the replica.")
 			}
 		}
-		return &api.Ack{Status: api.Ack_SUCCESS}
+		return &api.Ack{Status: api.Ack_SUCCESS}, nil
 	} else {
-		return &api.Ack{Status: api.Ack_FAILED}
+		return &api.Ack{Status: api.Ack_FAILED}, nil
 	}
 
 }
 
-func (s *AuctionServer) Result(empty *api.Empty) (*api.Outcome, error) {
+func (s AuctionServer) Result(ctx context.Context, empty *api.Empty) (*api.Outcome, error) {
 	replica_idx := rand.Intn(len(clients))
 	for i := 0; i < 5; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -97,4 +98,18 @@ func main() {
 	for _, replica := range os.Args {
 		clients = append(clients, newClient(replica))
 	}
+
+	lis, err := net.Listen("tcp", ":50000")
+	if err != nil {
+		log.Fatalf("Failed to listen: %v", err)
+	}
+
+	grpcServer := grpc.NewServer()
+
+	api.RegisterAuctionServer(grpc.NewServer(), AuctionServer{})
+	log.Printf("Auction Server listening to %s\n", lis.Addr())
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("Failed to serve: %v", err)
+	}
+
 }
