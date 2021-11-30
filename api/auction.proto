@@ -24,11 +24,8 @@ message Outcome {
     string Winner = 2;
 }
 
-service Auction {
+service RM {
     rpc Bid(BidMsg) returns (Ack);
     rpc Result(Empty) returns (Outcome);
-}
-
-service ReplicationControl {
     rpc ForceBid(BidMsg) returns (Ack);
 }

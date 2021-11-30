@@ -14,208 +14,158 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// AuctionClient is the client API for Auction service.
+// RMClient is the client API for RM service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type AuctionClient interface {
+type RMClient interface {
 	Bid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error)
 	Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Outcome, error)
+	ForceBid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error)
 }
 
-type auctionClient struct {
+type rMClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewAuctionClient(cc grpc.ClientConnInterface) AuctionClient {
-	return &auctionClient{cc}
+func NewRMClient(cc grpc.ClientConnInterface) RMClient {
+	return &rMClient{cc}
 }
 
-func (c *auctionClient) Bid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error) {
+func (c *rMClient) Bid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error) {
 	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/Auction/Bid", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/RM/Bid", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *auctionClient) Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Outcome, error) {
+func (c *rMClient) Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Outcome, error) {
 	out := new(Outcome)
-	err := c.cc.Invoke(ctx, "/Auction/Result", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/RM/Result", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// AuctionServer is the server API for Auction service.
-// All implementations must embed UnimplementedAuctionServer
+func (c *rMClient) ForceBid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error) {
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, "/RM/ForceBid", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// RMServer is the server API for RM service.
+// All implementations must embed UnimplementedRMServer
 // for forward compatibility
-type AuctionServer interface {
+type RMServer interface {
 	Bid(context.Context, *BidMsg) (*Ack, error)
 	Result(context.Context, *Empty) (*Outcome, error)
-	mustEmbedUnimplementedAuctionServer()
+	ForceBid(context.Context, *BidMsg) (*Ack, error)
+	mustEmbedUnimplementedRMServer()
 }
 
-// UnimplementedAuctionServer must be embedded to have forward compatible implementations.
-type UnimplementedAuctionServer struct {
+// UnimplementedRMServer must be embedded to have forward compatible implementations.
+type UnimplementedRMServer struct {
 }
 
-func (UnimplementedAuctionServer) Bid(context.Context, *BidMsg) (*Ack, error) {
+func (UnimplementedRMServer) Bid(context.Context, *BidMsg) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Bid not implemented")
 }
-func (UnimplementedAuctionServer) Result(context.Context, *Empty) (*Outcome, error) {
+func (UnimplementedRMServer) Result(context.Context, *Empty) (*Outcome, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Result not implemented")
 }
-func (UnimplementedAuctionServer) mustEmbedUnimplementedAuctionServer() {}
+func (UnimplementedRMServer) ForceBid(context.Context, *BidMsg) (*Ack, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ForceBid not implemented")
+}
+func (UnimplementedRMServer) mustEmbedUnimplementedRMServer() {}
 
-// UnsafeAuctionServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to AuctionServer will
+// UnsafeRMServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to RMServer will
 // result in compilation errors.
-type UnsafeAuctionServer interface {
-	mustEmbedUnimplementedAuctionServer()
+type UnsafeRMServer interface {
+	mustEmbedUnimplementedRMServer()
 }
 
-func RegisterAuctionServer(s grpc.ServiceRegistrar, srv AuctionServer) {
-	s.RegisterService(&Auction_ServiceDesc, srv)
+func RegisterRMServer(s grpc.ServiceRegistrar, srv RMServer) {
+	s.RegisterService(&RM_ServiceDesc, srv)
 }
 
-func _Auction_Bid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RM_Bid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BidMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuctionServer).Bid(ctx, in)
+		return srv.(RMServer).Bid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Auction/Bid",
+		FullMethod: "/RM/Bid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuctionServer).Bid(ctx, req.(*BidMsg))
+		return srv.(RMServer).Bid(ctx, req.(*BidMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Auction_Result_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RM_Result_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AuctionServer).Result(ctx, in)
+		return srv.(RMServer).Result(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/Auction/Result",
+		FullMethod: "/RM/Result",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuctionServer).Result(ctx, req.(*Empty))
+		return srv.(RMServer).Result(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// Auction_ServiceDesc is the grpc.ServiceDesc for Auction service.
-// It's only intended for direct use with grpc.RegisterService,
-// and not to be introspected or modified (even as a copy)
-var Auction_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "Auction",
-	HandlerType: (*AuctionServer)(nil),
-	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Bid",
-			Handler:    _Auction_Bid_Handler,
-		},
-		{
-			MethodName: "Result",
-			Handler:    _Auction_Result_Handler,
-		},
-	},
-	Streams:  []grpc.StreamDesc{},
-	Metadata: "auction.proto",
-}
-
-// ReplicationControlClient is the client API for ReplicationControl service.
-//
-// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ReplicationControlClient interface {
-	ForceBid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error)
-}
-
-type replicationControlClient struct {
-	cc grpc.ClientConnInterface
-}
-
-func NewReplicationControlClient(cc grpc.ClientConnInterface) ReplicationControlClient {
-	return &replicationControlClient{cc}
-}
-
-func (c *replicationControlClient) ForceBid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error) {
-	out := new(Ack)
-	err := c.cc.Invoke(ctx, "/ReplicationControl/ForceBid", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-// ReplicationControlServer is the server API for ReplicationControl service.
-// All implementations must embed UnimplementedReplicationControlServer
-// for forward compatibility
-type ReplicationControlServer interface {
-	ForceBid(context.Context, *BidMsg) (*Ack, error)
-	mustEmbedUnimplementedReplicationControlServer()
-}
-
-// UnimplementedReplicationControlServer must be embedded to have forward compatible implementations.
-type UnimplementedReplicationControlServer struct {
-}
-
-func (UnimplementedReplicationControlServer) ForceBid(context.Context, *BidMsg) (*Ack, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ForceBid not implemented")
-}
-func (UnimplementedReplicationControlServer) mustEmbedUnimplementedReplicationControlServer() {}
-
-// UnsafeReplicationControlServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ReplicationControlServer will
-// result in compilation errors.
-type UnsafeReplicationControlServer interface {
-	mustEmbedUnimplementedReplicationControlServer()
-}
-
-func RegisterReplicationControlServer(s grpc.ServiceRegistrar, srv ReplicationControlServer) {
-	s.RegisterService(&ReplicationControl_ServiceDesc, srv)
-}
-
-func _ReplicationControl_ForceBid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _RM_ForceBid_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(BidMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ReplicationControlServer).ForceBid(ctx, in)
+		return srv.(RMServer).ForceBid(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/ReplicationControl/ForceBid",
+		FullMethod: "/RM/ForceBid",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ReplicationControlServer).ForceBid(ctx, req.(*BidMsg))
+		return srv.(RMServer).ForceBid(ctx, req.(*BidMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ReplicationControl_ServiceDesc is the grpc.ServiceDesc for ReplicationControl service.
+// RM_ServiceDesc is the grpc.ServiceDesc for RM service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ReplicationControl_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ReplicationControl",
-	HandlerType: (*ReplicationControlServer)(nil),
+var RM_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "RM",
+	HandlerType: (*RMServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "Bid",
+			Handler:    _RM_Bid_Handler,
+		},
+		{
+			MethodName: "Result",
+			Handler:    _RM_Result_Handler,
+		},
+		{
 			MethodName: "ForceBid",
-			Handler:    _ReplicationControl_ForceBid_Handler,
+			Handler:    _RM_ForceBid_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

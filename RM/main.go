@@ -18,15 +18,14 @@ var user string
 var lock sync.Mutex
 
 func main() {
-	go startAuctionServer()
-	startReplicationControlServer()
+	go startRMServer()
 }
 
-type AuctionServer struct {
-	api.UnimplementedAuctionServer
+type RMServer struct {
+	api.UnimplementedRMServer
 }
 
-func (as *AuctionServer) Bid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
+func (as *RMServer) Bid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -44,17 +43,13 @@ func (as *AuctionServer) Bid(ctx context.Context, bm *api.BidMsg) (*api.Ack, err
 	return &api.Ack{Status: api.Ack_EXCEPTION}, errors.New("magically broke simple algebra")
 }
 
-func (as *AuctionServer) Result(context.Context, *api.Empty) (*api.Outcome, error) {
+func (as *RMServer) Result(context.Context, *api.Empty) (*api.Outcome, error) {
 	log.Printf("The highest current bid: %d", highestBid)
 
 	return &api.Outcome{ResultOrHighest: highestBid, Winner: user}, nil
 }
 
-type ReplicationControlServer struct {
-	api.UnimplementedReplicationControlServer
-}
-
-func (r *ReplicationControlServer) ForceBid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
+func (r *RMServer) ForceBid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
 	lock.Lock()
 	defer lock.Unlock()
 
@@ -70,7 +65,7 @@ func (r *ReplicationControlServer) ForceBid(ctx context.Context, bm *api.BidMsg)
 	}
 }
 
-func startAuctionServer() {
+func startRMServer() {
 
 	lis, err := net.Listen("tcp", port)
 	if err != nil {
@@ -78,26 +73,10 @@ func startAuctionServer() {
 	}
 
 	grpcServer := grpc.NewServer()
-	server := AuctionServer{}
+	server := RMServer{}
 
-	api.RegisterAuctionServer(grpcServer, &server)
-	log.Printf("Auction Server listening to %s\n", lis.Addr())
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("Failed to serve: %v", err)
-	}
-}
-
-func startReplicationControlServer() {
-	lis, err := net.Listen("tcp", port)
-	if err != nil {
-		log.Fatalf("Failed ot listen: %v", err)
-	}
-
-	grpcServer := grpc.NewServer()
-	server := ReplicationControlServer{}
-
-	api.RegisterReplicationControlServer(grpcServer, &server)
-	log.Printf("Replication Contrl Server listening to %s\n", lis.Addr())
+	api.RegisterRMServer(grpcServer, &server)
+	log.Printf("RM Server listening to %s\n", lis.Addr())
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}

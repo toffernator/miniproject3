@@ -21,12 +21,12 @@ var (
 func main() {
 	conn, err := grpc.Dial(*addressFlag, grpc.WithInsecure(), grpc.WithBlock())
 	must(err)
-	client := api.NewAuctionClient(conn)
+	client := api.NewRMClient(conn)
 
 	clientLoop(client)
 }
 
-func clientLoop(c api.AuctionClient) {
+func clientLoop(c api.RMClient) {
 	isDone := false
 	for !isDone {
 		prompt := promptui.Select{
@@ -48,7 +48,7 @@ func clientLoop(c api.AuctionClient) {
 	}
 }
 
-func Bid(c api.AuctionClient) {
+func Bid(c api.RMClient) {
 	bidPrompt := promptui.Prompt{
 		Label: "Amount: ",
 	}
@@ -69,7 +69,7 @@ func Bid(c api.AuctionClient) {
 	c.Bid(ctx, &payload)
 }
 
-func Result(c api.AuctionClient) {
+func Result(c api.RMClient) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	payload := api.Empty{}

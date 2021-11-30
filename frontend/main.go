@@ -14,11 +14,11 @@ import (
 
 var clients = make([]*CombinedClient, 0)
 
-type AuctionServer struct {
-	api.UnimplementedAuctionServer
+type RMServer struct {
+	api.UnimplementedRMServer
 }
 
-func (s *AuctionServer) Bid(msg *api.BidMsg) *api.Ack {
+func (s *RMServer) Bid(msg *api.BidMsg) *api.Ack {
 	failed_clients := make([]*CombinedClient, 0)
 	for _, client := range clients {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -53,7 +53,7 @@ func (s *AuctionServer) Bid(msg *api.BidMsg) *api.Ack {
 
 }
 
-func (s *AuctionServer) Result(empty *api.Empty) (*api.Outcome, error) {
+func (s *RMServer) Result(empty *api.Empty) (*api.Outcome, error) {
 	replica_idx := rand.Intn(len(clients))
 	for i := 0; i < 5; i++ {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -69,8 +69,7 @@ func (s *AuctionServer) Result(empty *api.Empty) (*api.Outcome, error) {
 }
 
 type CombinedClient struct {
-	api.AuctionClient
-	api.ReplicationControlClient
+	api.RMClient
 	server_addr string
 }
 
@@ -81,13 +80,11 @@ func newClient(server string) *CombinedClient {
 		log.Fatalf("Failed to connect to next node")
 	}
 
-	auctionClient := api.NewAuctionClient(conn)
-	replicationClient := api.NewReplicationControlClient(conn)
+	rmClient := api.NewRMClient(conn)
 
 	client := CombinedClient{
-		AuctionClient:            auctionClient,
-		ReplicationControlClient: replicationClient,
-		server_addr:              server,
+		RMClient:    rmClient,
+		server_addr: server,
 	}
 
 	return &client
