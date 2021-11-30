@@ -104,7 +104,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	api.RegisterAuctionServer(grpc.NewServer(), AuctionServer{})
+	api.RegisterAuctionServer(grpcServer, AuctionServer{})
 	log.Printf("Auction Server listening to %s\n", lis.Addr())
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)

@@ -27,6 +27,8 @@ services:
       dockerfile: ./frontend/Dockerfile
     networks:
       - auction-net
+    ports:
+      - "50000:50000"
     command: replica1:50000 replica2:50000 replica3:50000
   frontend2:
     image: miniproject3-frontend
@@ -35,6 +37,8 @@ services:
       dockerfile: ./frontend/Dockerfile
     networks:
       - auction-net
+    ports:
+      - "50001:50000"
     command: replica1:50000 replica2:50000 replica3:50000
 networks:
   auction-net: {}
