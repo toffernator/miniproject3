@@ -18,7 +18,7 @@ var user string
 var lock sync.Mutex
 
 func main() {
-	go startRMServer()
+	startRMServer()
 }
 
 type RMServer struct {

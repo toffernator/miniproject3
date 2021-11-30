@@ -24,6 +24,12 @@ message Outcome {
     string Winner = 2;
 }
 
+
+service Auction {
+    rpc Bid(BidMsg) returns (Ack);
+    rpc Result(Empty) returns (Outcome);
+}
+
 service RM {
     rpc Bid(BidMsg) returns (Ack);
     rpc Result(Empty) returns (Outcome);

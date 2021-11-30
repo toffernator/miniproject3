@@ -6,7 +6,6 @@ services:
       dockerfile: ./RM/Dockerfile
     networks:
       - auction-net
-    command: node2:50000 --start
   replica2:
     image: miniproject3-rm
     build: 
@@ -14,7 +13,6 @@ services:
       dockerfile: ./RM/Dockerfile
     networks:
       - auction-net
-    command: node3:50000
   replica3:
     image: miniproject3-rm
     build: 
@@ -22,7 +20,6 @@ services:
       dockerfile: ./RM/Dockerfile
     networks:
       - auction-net
-    command: node4:50000
   frontend1:
     image: miniproject3-frontend
     build: 
@@ -30,7 +27,7 @@ services:
       dockerfile: ./frontend/Dockerfile
     networks:
       - auction-net
-    command: node5:50000
+    command: replica1:50000 replica2:50000 replica3:50000
   frontend2:
     image: miniproject3-frontend
     build: 
@@ -38,23 +35,6 @@ services:
       dockerfile: ./frontend/Dockerfile
     networks:
       - auction-net
-    command: node1:50000
-  client1:
-    image: miniproject3-client
-    build: 
-      context: .
-      dockerfile: ./client/Dockerfile
-    networks:
-      - auction-net
-    command: node5:50000
-  client2:
-    image: miniproject3-client
-    build: 
-      context: .
-      dockerfile: ./client/Dockerfile
-    networks:
-      - auction-net
-    command: node1:50000
-  
+    command: replica1:50000 replica2:50000 replica3:50000
 networks:
   auction-net: {}
