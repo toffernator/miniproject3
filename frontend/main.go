@@ -92,9 +92,16 @@ func newClient(server string) *CombinedClient {
 }
 
 func main() {
+	time.Sleep(time.Second)
+
 	replicas := os.Args[1:]
-	for _, replica := range replicas {
+	for i, replica := range replicas {
 		clients = append(clients, newClient(replica))
+
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+		outcome, _ := clients[i].Result(ctx, &api.Empty{})
+		log.Printf("%s has outcome %d", clients[i].server_addr, outcome.ResultOrHighest)
 	}
 
 	lis, err := net.Listen("tcp", ":50000")

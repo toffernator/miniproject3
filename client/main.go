@@ -22,6 +22,9 @@ func main() {
 	flag.Parse()
 	conn, err := grpc.Dial(*addressFlag, grpc.WithInsecure(), grpc.WithBlock())
 	must(err)
+
+	log.Printf("Successfully connected to %s", conn.Target())
+
 	client := api.NewAuctionClient(conn)
 
 	clientLoop(client)
@@ -74,7 +77,8 @@ func Result(c api.AuctionClient) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	payload := api.Empty{}
-	outcome, _ := c.Result(ctx, &payload)
+	outcome, err := c.Result(ctx, &payload)
+	must(err)
 
 	log.Printf("Result: %d by %s", outcome.ResultOrHighest, outcome.Winner)
 }
