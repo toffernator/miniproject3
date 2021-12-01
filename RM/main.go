@@ -16,9 +16,10 @@ const port = ":50000"
 var highestBid int32
 var user string
 var lock sync.Mutex
-var ongoing = true
+var ongoing bool
 
 func main() {
+	ongoing = true
 	startRMServer()
 }
 
@@ -44,7 +45,7 @@ func (as *RMServer) Bid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
 		}
 		return &api.Ack{Status: api.Ack_EXCEPTION}, errors.New("magically broke simple algebra")
 	} else {
-		return &api.Ack{Status: api.Ack_ENDED}, errors.New("Cannot bid as the auction has ended")
+		return &api.Ack{Status: api.Ack_ENDED}, errors.New("cannot bid as the auction has ended")
 	}
 }
 
@@ -77,9 +78,8 @@ func (r *RMServer) ForceBid(ctx context.Context, bm *api.BidMsg) (*api.Ack, erro
 	return &api.Ack{Status: api.Ack_ENDED}, nil
 }
 
-func EndAuction(context.Context, *api.Empty) (*api.Ack, error) {
+func (r *RMServer) EndAuction(context.Context, *api.Empty) (*api.Ack, error) {
 	ongoing = false
-	log.Printf("The auction has ended!")
 	return &api.Ack{Status: api.Ack_SUCCESS}, nil
 }
 

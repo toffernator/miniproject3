@@ -93,7 +93,7 @@ func newClient(server string) *CombinedClient {
 
 func EndAuction() {
 
-	duration := time.Duration(5) * time.Second
+	duration := time.Duration(30) * time.Second
 
 	f := func() {
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -107,7 +107,7 @@ func EndAuction() {
 	timer := time.AfterFunc(duration, f)
 	defer timer.Stop()
 
-	time.Sleep(time.Second * 10)
+	time.Sleep(time.Second * 30)
 
 	log.Printf("The auction has ended!")
 }
@@ -125,7 +125,7 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
-	EndAuction()
+	go EndAuction()
 
 	api.RegisterAuctionServer(grpcServer, AuctionServer{})
 	log.Printf("Auction Server listening to %s\n", lis.Addr())
