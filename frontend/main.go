@@ -28,11 +28,11 @@ func (s AuctionServer) Bid(ctx context.Context, msg *api.BidMsg) (*api.Ack, erro
 		if err != nil {
 			log.Printf("Could not reach %s. Error: %v", client.server_addr, err)
 		}
-		if ack.Status != api.Ack_SUCCESS || err != nil {
+		if err != nil || ack.Status != api.Ack_SUCCESS {
 			failed_clients = append(failed_clients, client)
 		}
 	}
-	// This client won the consensus.
+	// This frontend won the consensus.
 	if len(failed_clients) <= len(clients)/2 {
 		for _, client := range failed_clients {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -40,8 +40,7 @@ func (s AuctionServer) Bid(ctx context.Context, msg *api.BidMsg) (*api.Ack, erro
 			ack, err := client.ForceBid(ctx, msg)
 			if err != nil {
 				log.Printf("Replica %s not responding. It is probably dead.", client.server_addr)
-			}
-			if ack.Status == api.Ack_FAILED {
+			} else if ack.Status == api.Ack_FAILED {
 				log.Println("Force sync failed. This means a competing write bid higher, rendering the force sync unnecessary.")
 			} else if ack.Status == api.Ack_EXCEPTION {
 				log.Println("Unknown exception occured in the replica.")
@@ -55,14 +54,16 @@ func (s AuctionServer) Bid(ctx context.Context, msg *api.BidMsg) (*api.Ack, erro
 }
 
 func (s AuctionServer) Result(ctx context.Context, empty *api.Empty) (*api.Outcome, error) {
-	replica_idx := rand.Intn(len(clients))
 	for i := 0; i < 5; i++ {
+		replica_idx := rand.Intn(len(clients))
+		log.Printf("Trying to reach replica %v", replica_idx)
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
 		outcome, err := clients[replica_idx].Result(ctx, &api.Empty{})
 		if err != nil {
 			log.Printf("Could not reach replica %s. Trying another.", clients[replica_idx].server_addr)
 		} else {
+			log.Printf("Returning result to client %v", outcome)
 			return outcome, nil
 		}
 	}
