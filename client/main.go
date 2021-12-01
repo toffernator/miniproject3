@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 	"time"
@@ -12,6 +13,8 @@ import (
 	"github.com/toffernator/miniproject3/api"
 	"google.golang.org/grpc"
 )
+
+var randomizedName string
 
 var (
 	nameFlag    = flag.String("name", "name", "The name of your user")
@@ -24,6 +27,7 @@ func main() {
 	must(err)
 	client := api.NewAuctionClient(conn)
 
+	randomizedName = randomizeName()
 	clientLoop(client)
 }
 
@@ -51,30 +55,45 @@ func clientLoop(c api.AuctionClient) {
 
 func Bid(c api.AuctionClient) {
 	bidPrompt := promptui.Prompt{
-		Label: "Amount: ",
+		Label: "Amount",
 	}
 
-	amount, err := bidPrompt.Run()
-	must(err)
+	isDone := false
+	var amount int
+	for !isDone {
+		inputtedAmount, err := bidPrompt.Run()
+		must(err)
 
-	intAmount, err := strconv.Atoi(amount)
-	must(err)
+		amount, err = strconv.Atoi(inputtedAmount)
+		isDone = err == nil
+		if !isDone {
+			log.Println("You must enter a valid integer to bid")
+		}
+	}
 
 	payload := api.BidMsg{
-		Amount: int32(intAmount),
-		User:   *nameFlag,
+		Amount: int32(amount),
+		User:   randomizedName,
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	c.Bid(ctx, &payload)
+	ack, err := c.Bid(ctx, &payload)
+	if err != nil {
+		log.Fatalf("There was an internal error while executing the bid request: %v", err)
+	}
+
+	log.Println("Bid ", ack.Status.String())
 }
 
 func Result(c api.AuctionClient) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	payload := api.Empty{}
-	outcome, _ := c.Result(ctx, &payload)
+	outcome, err := c.Result(ctx, &payload)
+	if err != nil {
+		log.Fatalf("There was an internal error while processing the result request: %v", err)
+	}
 
 	log.Printf("Result: %d by %s", outcome.ResultOrHighest, outcome.Winner)
 }
@@ -87,4 +106,9 @@ func must(err error) {
 	if err != nil {
 		log.Fatalf("Failed with err code: %v", err)
 	}
+}
+
+func randomizeName() string {
+	rand.Seed(time.Now().UnixNano())
+	return *nameFlag + "-" + strconv.Itoa(rand.Int())
 }

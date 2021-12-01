@@ -24,6 +24,7 @@ func main() {
 }
 
 type RMServer struct {
+	isRegistered map[string]bool
 	api.UnimplementedRMServer
 }
 
@@ -33,6 +34,11 @@ func (as *RMServer) Bid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
 		defer lock.Unlock()
 
 		log.Printf("Received Bid")
+
+		if !as.isRegistered[bm.User] {
+			as.isRegistered[bm.User] = true
+			log.Printf("Registered %s to the auction", bm.User)
+		}
 
 		if bm.Amount > highestBid {
 			log.Printf("Bid was accepted with a value: %d | Previous highest bid: %d", bm.Amount, highestBid)
@@ -91,7 +97,9 @@ func startRMServer() {
 	}
 
 	grpcServer := grpc.NewServer()
-	server := RMServer{}
+	server := RMServer{
+		isRegistered: make(map[string]bool, 0),
+	}
 
 	api.RegisterRMServer(grpcServer, &server)
 	log.Printf("RM Server listening to %s\n", lis.Addr())
