@@ -91,6 +91,27 @@ func newClient(server string) *CombinedClient {
 	return &client
 }
 
+func EndAuction() {
+
+	duration := time.Duration(5) * time.Second
+
+	f := func() {
+		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		defer cancel()
+
+		for _, c := range clients {
+			c.EndAuction(ctx, &api.Empty{})
+		}
+	}
+
+	timer := time.AfterFunc(duration, f)
+	defer timer.Stop()
+
+	time.Sleep(time.Second * 10)
+
+	log.Printf("The auction has ended!")
+}
+
 func main() {
 	replicas := os.Args[1:]
 	for _, replica := range replicas {
@@ -104,10 +125,11 @@ func main() {
 
 	grpcServer := grpc.NewServer()
 
+	EndAuction()
+
 	api.RegisterAuctionServer(grpcServer, AuctionServer{})
 	log.Printf("Auction Server listening to %s\n", lis.Addr())
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalf("Failed to serve: %v", err)
 	}
-
 }

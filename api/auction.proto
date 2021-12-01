@@ -12,6 +12,7 @@ message Ack {
         FAILED = 0;
         SUCCESS = 1;
         EXCEPTION = 2;
+        ENDED = 3;
     }
     Status status = 1;
 }
@@ -34,4 +35,5 @@ service RM {
     rpc Bid(BidMsg) returns (Ack);
     rpc Result(Empty) returns (Outcome);
     rpc ForceBid(BidMsg) returns (Ack);
+    rpc EndAuction(Empty) returns (Ack);
 }

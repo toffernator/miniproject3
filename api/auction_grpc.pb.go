@@ -143,6 +143,7 @@ type RMClient interface {
 	Bid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error)
 	Result(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Outcome, error)
 	ForceBid(ctx context.Context, in *BidMsg, opts ...grpc.CallOption) (*Ack, error)
+	EndAuction(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Ack, error)
 }
 
 type rMClient struct {
@@ -180,6 +181,15 @@ func (c *rMClient) ForceBid(ctx context.Context, in *BidMsg, opts ...grpc.CallOp
 	return out, nil
 }
 
+func (c *rMClient) EndAuction(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Ack, error) {
+	out := new(Ack)
+	err := c.cc.Invoke(ctx, "/RM/EndAuction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // RMServer is the server API for RM service.
 // All implementations must embed UnimplementedRMServer
 // for forward compatibility
@@ -187,6 +197,7 @@ type RMServer interface {
 	Bid(context.Context, *BidMsg) (*Ack, error)
 	Result(context.Context, *Empty) (*Outcome, error)
 	ForceBid(context.Context, *BidMsg) (*Ack, error)
+	EndAuction(context.Context, *Empty) (*Ack, error)
 	mustEmbedUnimplementedRMServer()
 }
 
@@ -202,6 +213,9 @@ func (UnimplementedRMServer) Result(context.Context, *Empty) (*Outcome, error) {
 }
 func (UnimplementedRMServer) ForceBid(context.Context, *BidMsg) (*Ack, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ForceBid not implemented")
+}
+func (UnimplementedRMServer) EndAuction(context.Context, *Empty) (*Ack, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EndAuction not implemented")
 }
 func (UnimplementedRMServer) mustEmbedUnimplementedRMServer() {}
 
@@ -270,6 +284,24 @@ func _RM_ForceBid_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _RM_EndAuction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(RMServer).EndAuction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/RM/EndAuction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(RMServer).EndAuction(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // RM_ServiceDesc is the grpc.ServiceDesc for RM service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -288,6 +320,10 @@ var RM_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ForceBid",
 			Handler:    _RM_ForceBid_Handler,
+		},
+		{
+			MethodName: "EndAuction",
+			Handler:    _RM_EndAuction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

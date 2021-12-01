@@ -16,6 +16,7 @@ const port = ":50000"
 var highestBid int32
 var user string
 var lock sync.Mutex
+var ongoing = true
 
 func main() {
 	startRMServer()
@@ -26,43 +27,60 @@ type RMServer struct {
 }
 
 func (as *RMServer) Bid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
-	lock.Lock()
-	defer lock.Unlock()
+	if ongoing {
+		lock.Lock()
+		defer lock.Unlock()
 
-	log.Printf("Received Bid")
+		log.Printf("Received Bid")
 
-	if bm.Amount > highestBid {
-		log.Printf("Bid was accepted with a value: %d | Previous highest bid: %d", bm.Amount, highestBid)
-		highestBid = bm.Amount
-		user = bm.User
-		return &api.Ack{Status: api.Ack_SUCCESS}, nil
-	} else if bm.Amount <= highestBid {
-		log.Printf("Bid was not accepted. New bid: %d, was equal to or lower than previous bid: %d", bm.Amount, highestBid)
-		return &api.Ack{Status: api.Ack_FAILED}, nil
+		if bm.Amount > highestBid {
+			log.Printf("Bid was accepted with a value: %d | Previous highest bid: %d", bm.Amount, highestBid)
+			highestBid = bm.Amount
+			user = bm.User
+			return &api.Ack{Status: api.Ack_SUCCESS}, nil
+		} else if bm.Amount <= highestBid {
+			log.Printf("Bid was not accepted. New bid: %d, was equal to or lower than previous bid: %d", bm.Amount, highestBid)
+			return &api.Ack{Status: api.Ack_FAILED}, nil
+		}
+		return &api.Ack{Status: api.Ack_EXCEPTION}, errors.New("magically broke simple algebra")
+	} else {
+		return &api.Ack{Status: api.Ack_ENDED}, errors.New("Cannot bid as the auction has ended")
 	}
-	return &api.Ack{Status: api.Ack_EXCEPTION}, errors.New("magically broke simple algebra")
 }
 
 func (as *RMServer) Result(context.Context, *api.Empty) (*api.Outcome, error) {
-	log.Printf("The highest current bid: %d", highestBid)
-
+	if ongoing {
+		log.Printf("The highest current bid: %d", highestBid)
+	} else {
+		log.Printf("The auction has ended and the winner is: %s, with a bid of: %d", user, highestBid)
+	}
 	return &api.Outcome{ResultOrHighest: highestBid, Winner: user}, nil
 }
 
 func (r *RMServer) ForceBid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
-	lock.Lock()
-	defer lock.Unlock()
+	if ongoing {
+		lock.Lock()
+		defer lock.Unlock()
 
-	log.Printf("Forcefully changed the highest bid")
+		log.Printf("Forcefully changed the highest bid")
 
-	if bm.Amount == highestBid {
-		highestBid = bm.Amount
-		user = bm.User
-		return &api.Ack{Status: api.Ack_SUCCESS}, nil
-	} else {
-		log.Printf("tried forcing bid with bid amount not equal to highest bid")
-		return &api.Ack{Status: api.Ack_FAILED}, nil
+		if bm.Amount == highestBid {
+			highestBid = bm.Amount
+			user = bm.User
+			return &api.Ack{Status: api.Ack_SUCCESS}, nil
+		} else {
+			log.Printf("tried forcing bid with bid amount not equal to highest bid")
+			return &api.Ack{Status: api.Ack_FAILED}, nil
+		}
 	}
+	log.Printf("cannot bid as the auction has ended")
+	return &api.Ack{Status: api.Ack_ENDED}, nil
+}
+
+func EndAuction(context.Context, *api.Empty) (*api.Ack, error) {
+	ongoing = false
+	log.Printf("The auction has ended!")
+	return &api.Ack{Status: api.Ack_SUCCESS}, nil
 }
 
 func startRMServer() {
