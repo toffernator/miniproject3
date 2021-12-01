@@ -41,7 +41,7 @@ func (as *RMServer) Bid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
 		}
 
 		if bm.Amount > highestBid {
-			log.Printf("Bid was accepted with a value: %d | Previous highest bid: %d", bm.Amount, highestBid)
+			log.Printf("Bid was accepted with a value: %d", bm.Amount)
 			highestBid = bm.Amount
 			user = bm.User
 			return &api.Ack{Status: api.Ack_SUCCESS}, nil
@@ -51,7 +51,7 @@ func (as *RMServer) Bid(ctx context.Context, bm *api.BidMsg) (*api.Ack, error) {
 		}
 		return &api.Ack{Status: api.Ack_EXCEPTION}, errors.New("magically broke simple algebra")
 	} else {
-		return &api.Ack{Status: api.Ack_ENDED}, errors.New("cannot bid as the auction has ended")
+		return &api.Ack{Status: api.Ack_ENDED}, nil
 	}
 }
 

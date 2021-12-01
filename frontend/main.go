@@ -31,7 +31,11 @@ func (s AuctionServer) Bid(ctx context.Context, msg *api.BidMsg) (*api.Ack, erro
 		if err != nil || ack.Status != api.Ack_SUCCESS {
 			failed_clients = append(failed_clients, client)
 		}
+		if err != nil || ack.Status == api.Ack_ENDED {
+			return &api.Ack{Status: api.Ack_ENDED}, nil
+		}
 	}
+
 	// This frontend won the consensus.
 	if len(failed_clients) <= len(clients)/2 {
 		for _, client := range failed_clients {
