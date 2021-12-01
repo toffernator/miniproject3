@@ -76,7 +76,7 @@ func Bid(c api.AuctionClient) {
 		User:   randomizedName,
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 	ack, err := c.Bid(ctx, &payload)
 	if err != nil {
@@ -87,7 +87,7 @@ func Bid(c api.AuctionClient) {
 }
 
 func Result(c api.AuctionClient) {
-	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 	payload := api.Empty{}
 	outcome, err := c.Result(ctx, &payload)

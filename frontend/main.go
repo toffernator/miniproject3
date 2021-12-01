@@ -61,7 +61,7 @@ func (s AuctionServer) Result(ctx context.Context, empty *api.Empty) (*api.Outco
 	for i := 0; i < 5; i++ {
 		replica_idx := rand.Intn(len(clients))
 		log.Printf("Trying to reach replica %v", replica_idx)
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
 		defer cancel()
 		outcome, err := clients[replica_idx].Result(ctx, &api.Empty{})
 		if err != nil {
@@ -71,6 +71,19 @@ func (s AuctionServer) Result(ctx context.Context, empty *api.Empty) (*api.Outco
 			return outcome, nil
 		}
 	}
+	for i, client := range clients {
+		log.Printf("Trying to reach replica %v", i)
+		ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+		defer cancel()
+		outcome, err := client.Result(ctx, &api.Empty{})
+		if err != nil {
+			log.Printf("Could not reach replica %s. Trying another.", client.server_addr)
+		} else {
+			log.Printf("Returning result to client %v", outcome)
+			return outcome, nil
+		}
+	}
+
 	return nil, errors.New("No replicas available.")
 }
 
@@ -119,6 +132,7 @@ func EndAuction() {
 
 func main() {
 	replicas := os.Args[1:]
+	rand.Seed(time.Now().UnixMicro())
 	for _, replica := range replicas {
 		clients = append(clients, newClient(replica))
 	}
